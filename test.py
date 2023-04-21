@@ -38,7 +38,7 @@ if (opt.phase == "val" or opt.phase == "test"):
     image_indices = [2, 7, 8, 18, 35, 36, 38, 45, 47, 52, 56, 57, 58, 60, 63, 64, 66, 72, 74, 80]
 
     dataset = dataset_cl(opt, phase=opt.phase)
-    evaluate(model, dataset, opt)
+    #evaluate(model, dataset, opt)
 
 if opt.phase == "test":
     model = models.OASIS_model(opt)
