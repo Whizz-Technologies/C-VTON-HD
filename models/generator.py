@@ -172,8 +172,8 @@ class OASIS_Simple(nn.Module):
         z = torch.cat((I_m, C_t, C_transformed), dim=1)
         
         seg_dict = {
-            "body": body_seg,
-            "cloth": cloth_seg,
+            "body": None,
+            "cloth": None,
             "densepose": densepose_seg
         }
         

@@ -62,6 +62,13 @@ semantic_densepose_labels = [
 	[127, 255, 212]
 ]
 
+cloth_segm_list = [
+  [128,0,0],
+  [128,128,0],
+  [0,128,0]
+]
+
+
 semantic_body_labels = [
     [127, 127, 127],
     [0, 255, 255],
@@ -131,6 +138,7 @@ class VitonDataset(Dataset):
     
     def __getitem__(self, index):
         df_row = self.filepath_df.iloc[index]
+        id_img =  df_row["poseA"].split('_')[1].split('.')[0]
         print(self.filepath_df.head())
         # get original image of person
         print(df_row["poseA"])
@@ -142,13 +150,14 @@ class VitonDataset(Dataset):
         original_size = image.shape[:2]
         
         # extract non-warped cloth
-        print(os.path.join(self.db_path, "cloth", df_row["target"]))
-        cloth_image = cv2.imread(os.path.join(self.db_path, "cloth", df_row["target"]))
+        print(os.path.join(self.db_path, df_row["target"]))
+        cloth_image = cv2.imread(os.path.join(self.db_path, df_row["target"]))
         cloth_image = cv2.cvtColor(cloth_image, cv2.COLOR_BGR2RGB)
         
         # load cloth labels
-        print(os.path.join(self.db_path, 'data',"image_parse_with_hands", '0' + df_row["poseA"].replace("00.jpg", "0.png")))
-        cloth_seg = cv2.imread(os.path.join(self.db_path, 'data',"image_parse_with_hands", '0' + df_row["poseA"].replace("00.jpg", "0.png")))
+        print('/content/img_t_{}_generated.png'.format(id_img))
+        cloth_seg = cv2.imread('/content/img_t_{}_generated.png'.format(id_img))
+        #cloth_seg = cv2.imread(os.path.join(self.db_path, 'data',"image_parse_with_hands", '0' + df_row["poseA"].replace("00.jpg", "0.png")))
         cloth_seg = cv2.cvtColor(cloth_seg, cv2.COLOR_BGR2RGB)
         cloth_seg = cv2.resize(cloth_seg, self.opt.img_size[::-1], interpolation=cv2.INTER_NEAREST)
 
@@ -158,9 +167,10 @@ class VitonDataset(Dataset):
         # additionally, get cloth segmentations by cloth part
         cloth_seg_transf = np.zeros(self.opt.img_size)
         mask = np.zeros(self.opt.img_size)
-        for i, color in enumerate(semantic_cloth_labels):
+        for i, color in enumerate(cloth_segm_list):
             cloth_seg_transf[np.all(cloth_seg == color, axis=-1)] = i
-            if i < (6 + self.opt.no_bg):    # this works, because colors are sorted in a specific way with background being the 8th.
+            if 0 <= i < (2 + self.opt.no_bg):     # this works, because colors are sorted in a specific way with background being the 8th.
+                print("self.opt.no_bg",self.opt.no_bg)
                 mask[np.all(cloth_seg == color, axis=-1)] = 1.0
                 
         cloth_seg_transf = np.expand_dims(cloth_seg_transf, 0)
@@ -170,8 +180,8 @@ class VitonDataset(Dataset):
         masked_image = image * (1 - mask)
         
         # load and process the body labels
-        print(os.path.join(self.db_path, "data", "image_body_parse", '0' + df_row["poseA"].replace("00.jpg", "0.png")))
-        body_seg = cv2.imread(os.path.join(self.db_path, "data", "image_body_parse", '0' + df_row["poseA"].replace("00.jpg", "0.png")))
+        print('/content/seg_{}_cvton.png'.format(id_img))
+        body_seg = cv2.imread('/content/seg_{}_cvton.png'.format(id_img))
         body_seg = cv2.cvtColor(body_seg, cv2.COLOR_BGR2RGB)
         body_seg = cv2.resize(body_seg, self.opt.img_size[::-1], interpolation=cv2.INTER_NEAREST)
         
@@ -202,7 +212,8 @@ class VitonDataset(Dataset):
         
         body_seg_transf = np.expand_dims(body_seg_transf, 0)
         body_seg_transf = torch.tensor(body_seg_transf)
-        densepose_seg = cv2.imread(os.path.join(self.db_path, "data", "image_densepose_parse", '0' + df_row["poseA"].replace("00.jpg", "0.png")))
+        print('/content/seg_{}_cvton.png'.format(id_img))
+        densepose_seg = cv2.imread('/content/seg_{}_cvton.png'.format(id_img))
         densepose_seg = cv2.cvtColor(densepose_seg, cv2.COLOR_BGR2RGB)
         densepose_seg = cv2.resize(densepose_seg, self.opt.img_size[::-1], interpolation=cv2.INTER_NEAREST)
         
