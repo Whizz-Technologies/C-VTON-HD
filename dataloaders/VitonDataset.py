@@ -138,7 +138,8 @@ class VitonDataset(Dataset):
     
     def __getitem__(self, index):
         df_row = self.filepath_df.iloc[index]
-        id_img =  df_row["poseA"].split('_')[1].split('.')[0]
+        # id_img =  df_row["poseA"].split('_')[1].split('.')[0]
+        id_img = 0
         print(self.filepath_df.head())
         # get original image of person
         print(df_row["poseA"])
