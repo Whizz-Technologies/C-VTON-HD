@@ -178,8 +178,13 @@ class VitonDataset(Dataset):
         cloth_seg_transf = torch.tensor(cloth_seg_transf)
         
         mask = np.repeat(np.expand_dims(mask, -1), 3, axis=-1).astype(np.uint8)
+        cv2.imwrite("/content/orig_mask.png",mask)
         masked_image = image * (1 - mask)
-        
+        cv2.imwrite("/content/orig_mask_image.png",masked_image)
+        #print("Unique Values in masked_image",np.unique(masked_image))
+        masked_image = np.load(os.path.join('/content/img_t_{}_masked.npy'.format(id_img)))
+        masked_image = masked_image.astype(np.uint8)
+        print("Unique Values in masked_image",np.unique(masked_image))
         # load and process the body labels
         print('/content/seg_{}_cvton.png'.format(id_img))
         body_seg = cv2.imread('/content/seg_{}_cvton.png'.format(id_img))
